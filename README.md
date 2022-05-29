@@ -29,6 +29,9 @@ Join the [VORP Community Discord](https://discord.gg/23MPbQ6)
 ## How-to-configure
 All configurations available in `config.lua`
 
+- NativeZones = True/False (If you want to use the native notification of the custom one)
+- Notification.TimeShowing = How long the notification will display.
+
 ## TODO
 - [Trello](https://trello.com/b/CYsF6PuX/bcc-zonealerts)
 
