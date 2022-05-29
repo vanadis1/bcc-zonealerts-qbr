@@ -1,8 +1,8 @@
-# BCC - zonealerts
+# BCC - zonealerts QBR version
 
-> A RedM zone notification system for [Vorp Core](http://docs.vorpcore.com:3000/)
+> A RedM zone notification system for QBR
 
-Join the [VORP Community Discord](https://discord.gg/23MPbQ6)
+Join the [QBR Community Discord](https://discord.gg/qbcore)
 
 ## Features
 
@@ -22,8 +22,8 @@ Join the [VORP Community Discord](https://discord.gg/23MPbQ6)
 
 ## Installation
 1. Download this repo/codebase
-2. Extract and place `bcc-zonealerts` into your `resources` folder
-3. Add `ensure bcc-zonealerts` to your `server.cfg` file
+2. Extract and place `bcc-zonealerts-qbr` into your `resources` folder
+3. Add `ensure bcc-zonealerts-qbr` to your `server.cfg` file
 4. Restart your server (unless you have nightly restarts)
 
 ## How-to-configure
@@ -36,4 +36,7 @@ All configurations available in `config.lua`
 - [Trello](https://trello.com/b/CYsF6PuX/bcc-zonealerts)
 
  ## Dependency
- - Vorp Core
+ - QBR Core
+
+
+ 

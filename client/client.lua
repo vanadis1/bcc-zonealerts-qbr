@@ -1,62 +1,34 @@
 local hashstore = false
 
-local characterselected = false
-
-RegisterNetEvent("vorp:SelectedCharacter")
-AddEventHandler("vorp:SelectedCharacter", function(charid)
-	Wait(1000)
-	characterselected = true
-end)
-
-Citizen.CreateThread(function()
-	while true do
-		Citizen.Wait(3000)
-		local player = PlayerPedId()
-		local x, y, z = table.unpack(GetEntityCoords(player))		
-		local zone = nil
-	
-		local tempstate = Citizen.InvokeNative(0x43AD8FC02B429D33, x, y, z, 0)
-		if tempstate ~= false and tempstate ~= nil then
-			zone = tempstate
+local function getMapData(hash)
+	if hash then
+		local sd = Config.MapData[hash]
+		if sd then
+			return sd.ZoneName
+		else
+			print('No data for:', hash)
+			return 'Unknown'
 		end
-
-		local tempwritten = Citizen.InvokeNative(0x43AD8FC02B429D33, x, y, z, 13)
-		if tempwritten ~= false and tempwritten ~= nil then
-			zone = tempwritten
-		end
-
-		local tempprint = Citizen.InvokeNative(0x43AD8FC02B429D33, x, y, z, 12)
-		if tempprint ~= false and tempprint ~= nil then
-			zone = tempprint
-		end
-
-		local tempdistrict = Citizen.InvokeNative(0x43AD8FC02B429D33, x, y, z, 10)
-		if tempdistrict ~= false and tempdistrict ~= nil then
-			zone = tempdistrict
-		end
-
-		local temptown = Citizen.InvokeNative(0x43AD8FC02B429D33, x, y, z, 1)
-		if temptown ~= false and temptown ~= nil then
-			zone = temptown
-		end
-
-		if hashstore ~= zone and characterselected == true then
-			hashstore = zone
-			alertUI()
-		end
-	end
-end)
-
-
-function alertUI()
-	if Config.NativeZones == true then
-		nativeAlertTop()
 	else
-		alertTop()
-	end 
+		return 'Unknown'
+	end
 end
 
-function GetCardinalDirection(h)
+local function getZoneData(hash)
+	if hash then
+		local sd = Config.ZoneData[hash]
+		if sd then
+			return sd.texture
+		else
+			print('No data for:', hash)
+			return nil
+		end
+	else
+		return nil
+	end
+end
+
+local function GetCardinalDirection(h)
 	if h <= 22.5 then
 		return "N"
 	elseif h <= 67.5 then
@@ -78,35 +50,7 @@ function GetCardinalDirection(h)
 	end
 end
 
-function getMapData(hash)
-	if hash ~= false then
-		local sd = Config.MapData[hash]
-		if sd then
-			return sd.ZoneName
-		else
-			print('No data for:', hash)
-			return 'unknown'
-		end
-	else
-		return 'unknown'
-	end
-end
-
-function getZoneData(hash)
-	if hash ~= false then
-		local sd = Config.ZoneData[hash]
-		if sd then
-			return sd.texture
-		else
-			print('No data for:', hash)
-			return nil
-		end
-	else
-		return nil
-	end
-end
-
-function getIGTime()
+local function getIGTime()
 	-- Get Time for game
 	local hour =  GetClockHours()
 	local ap = 'am'
@@ -128,7 +72,7 @@ function getIGTime()
 	return hour ..":" .. GetClockMinutes() ..":" .. GetClockSeconds() .. ap
 end
 
-function getIGWindSpeed()
+local function getIGWindSpeed()
 	-- Get Temperatures
 	local metric = ShouldUseMetricTemperature();
 	local windSpeed
@@ -147,7 +91,7 @@ function getIGWindSpeed()
 	return string.format('%d °%s', windSpeed, windSpeedUnit)
 end
 
-function getIGTemp()
+local function getIGTemp()
 	-- Get Temperatures
 	local metric = ShouldUseMetricTemperature();
 	local temperature
@@ -173,19 +117,18 @@ function getIGTemp()
 	return string.format('%d °%s', temperature, temperatureUnit)
 end
 
-function nativeAlertTop() 
+local function nativeAlertTop() 
 	local zone = getZoneData(hashstore)
 
 	local time = getIGTime()
 	local temp = getIGTemp()
 	-- local wind = getIGWindSpeed()
-
 	if zone then
-		TriggerEvent("vorp_core:NotifyTop",  time .. ' ~COLOR_YELLOWSTRONG~' .. temp, zone, Config.Notification.TimeShowing)
+		exports['qbr-core']:Notify(9,''..time..''..temp..''..zone..'',Config.Notification.TimeShowing, 0, 'generic_textures', 'tick',"COLOR_YELLOW")
 	end
 end
 
-function alertTop()
+local function alertTop()
 	local player = PlayerPedId()
 	local x, y, z = table.unpack(GetEntityCoords(player))
 	local district_hash =  Citizen.InvokeNative(0x43AD8FC02B429D33, x, y, z, 10)
@@ -193,13 +136,11 @@ function alertTop()
 	local state_hash = Citizen.InvokeNative(0x43AD8FC02B429D33, x, y, z, 0)
 	local printed_hash = Citizen.InvokeNative(0x43AD8FC02B429D33, x, y, z, 12)
 	local written_hash = Citizen.InvokeNative(0x43AD8FC02B429D33, x, y, z, 13)
-
 	local district = getMapData(district_hash)
 	local town = getMapData(town_hash)
 	local state = getMapData(state_hash)
 	local printed = getMapData(print_hash)
 	local written = getMapData(written_hash)
-	
 	local time = getIGTime()
 	local temp = getIGTemp()
 	local wind = getIGWindSpeed()
@@ -216,8 +157,57 @@ function alertTop()
 	})
 end
 
+local function alertUI()
+	if Config.NativeZones == true then
+		nativeAlertTop()
+	else
+		alertTop()
+	end 
+end
+
+Citizen.CreateThread(function()
+	while true do
+		Citizen.Wait(3000)
+		if LocalPlayer.state.isLoggedIn then 
+			local player = PlayerPedId()
+			local x, y, z = table.unpack(GetEntityCoords(player))		
+			local zone = nil
+		
+			local tempstate = Citizen.InvokeNative(0x43AD8FC02B429D33, x, y, z, 0)
+			if tempstate and tempstate then
+				zone = tempstate
+			end
+
+			local tempwritten = Citizen.InvokeNative(0x43AD8FC02B429D33, x, y, z, 13)
+			if tempwritten then
+				zone = tempwritten
+			end
+
+			local tempprint = Citizen.InvokeNative(0x43AD8FC02B429D33, x, y, z, 12)
+			if tempprint then
+				zone = tempprint
+			end
+
+			local tempdistrict = Citizen.InvokeNative(0x43AD8FC02B429D33, x, y, z, 10)
+			if tempdistrict then
+				zone = tempdistrict
+			end
+
+			local temptown = Citizen.InvokeNative(0x43AD8FC02B429D33, x, y, z, 1)
+			if temptown then
+				zone = temptown
+			end
+
+			if hashstore ~= zone then
+				hashstore = zone
+				alertUI()
+			end
+		end
+	end
+end)
+
+
 RegisterCommand("zoneinfo", function(source, args, rawCommand) --  COMMAND
-	characterselected = true
 	alertUI()
 end)
 

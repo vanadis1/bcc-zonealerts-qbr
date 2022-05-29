@@ -2,7 +2,7 @@ Config = {}
 
 Config.Locale = "en"
 
-Config.NativeZones = true
+Config.NativeZones = false
 Config.Notification = {
   TimeShowing = 4000
 }
