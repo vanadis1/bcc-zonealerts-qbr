@@ -10,7 +10,7 @@
           <h2>{{title == district ? '' :  district.replace(/[A-Z]/g, ' $&').trim()  }}</h2>
           <img class="bc-hr" src="assets/scroller_right_bottom.png"/>
           <h4>{{state != 'Unknown' ? state.replace(/[A-Z]/g, ' $&').trim() : ''}}</h4>
-          <div>{{ time }} {{temp}}</div>
+          <div class="extra">{{ time }} <span class="temp">{{temp}}</span></div>
       </div>
   </div>
   </body>
